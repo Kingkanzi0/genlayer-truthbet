@@ -1,1 +1,652 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TruthBet — The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3ecdd;
+    --paper-deep:#e8ddc4;
+    --ink:#23201a;
+    --ink-soft:#5c5544;
+    --rule:#c9bb9a;
+    --seal:#8a3324;
+    --seal-deep:#6c2419;
+    --verdict-yes:#3c5d3f;
+    --verdict-no:#7a3b2e;
+    --gilt:#9c7a2e;
+    --shadow: 0 1px 0 rgba(35,32,26,0.04), 0 8px 24px -12px rgba(35,32,26,0.25);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 120% 80% at 50% -10%, rgba(140,107,46,0.10), transparent 60%),
+      var(--paper);
+    background-image:
+      radial-gradient(ellipse 120% 80% at 50% -10%, rgba(140,107,46,0.10), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(35,32,26,0.018) 0px, rgba(35,32,26,0.018) 1px, transparent 1px, transparent 3px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Source Serif 4', Georgia, serif;
+    min-height:100vh;
+    line-height:1.5;
+  }
+
+  .wrap{ max-width: 860px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  /* ---------- Letterhead ---------- */
+  .letterhead{
+    text-align:center;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 36px;
+    position:relative;
+  }
+  .seal{
+    width:54px; height:54px; margin:0 auto 14px;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #a8412e, var(--seal-deep) 70%);
+    display:flex; align-items:center; justify-content:center;
+    color:#f3ecdd; font-family:'Fraunces', serif; font-weight:700; font-size:22px;
+    box-shadow: inset 0 -3px 6px rgba(0,0,0,0.35), 0 3px 8px rgba(35,32,26,0.3);
+    border: 2px solid #f3ecdd;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-optical-sizing:auto;
+    font-weight:600;
+    font-size: clamp(34px, 5vw, 52px);
+    letter-spacing:-0.01em;
+    margin: 0 0 6px;
+  }
+  .subtitle{
+    color: var(--ink-soft);
+    font-style: italic;
+    font-size: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Wallet bar ---------- */
+  .walletbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 12px; flex-wrap: wrap;
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 12px 18px;
+    margin-bottom: 36px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .walletbar .label{ color: var(--ink-soft); }
+  .walletbar .addr{ color: var(--ink); font-weight:500; }
+  #connectBtn, .btn{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.15s ease;
+  }
+  #connectBtn:hover, .btn:hover{ background:#3a3527; }
+  #connectBtn:active, .btn:active{ transform: translateY(1px); }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn.ghost{
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  .btn.ghost:hover{ background: rgba(35,32,26,0.06); }
+
+  /* ---------- The Docket (question card) ---------- */
+  .docket{
+    background: #fbf7ec;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    box-shadow: var(--shadow);
+    padding: 36px 40px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .docket::before{
+    content:"";
+    position:absolute; left:0; top:18px; bottom:18px; width:3px;
+    background: var(--seal);
+  }
+  .case-no{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  .question{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: clamp(24px, 3.4vw, 32px);
+    line-height:1.25;
+    margin: 0 0 18px;
+  }
+  .meta-row{
+    display:flex; gap: 28px; flex-wrap:wrap;
+    font-size: 14px;
+    color: var(--ink-soft);
+    border-top: 1px dashed var(--rule);
+    padding-top: 16px;
+  }
+  .meta-row .item b{ color: var(--ink); display:block; font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:500;}
+  .meta-row .item span.k{ font-size:11px; text-transform:uppercase; letter-spacing:0.08em; }
+
+  /* ---------- Status / Verdict ribbon ---------- */
+  .ribbon{
+    margin: 0 0 28px;
+    padding: 16px 22px;
+    border-radius: 2px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 14px;
+    display:flex; align-items:center; gap:12px;
+    border: 1px solid var(--rule);
+  }
+  .ribbon.open{ background: #efe8d3; color: var(--ink-soft); }
+  .ribbon.yes{ background: #e3ecdf; border-color:#a9bfa3; color: var(--verdict-yes); }
+  .ribbon.no{ background: #f1e0d6; border-color:#d2ab97; color: var(--verdict-no); }
+  .ribbon .dot{ width:8px; height:8px; border-radius:50%; background:currentColor; flex-shrink:0;}
+  .rationale{
+    font-family:'Source Serif 4', serif;
+    font-style: italic;
+    font-size: 14px;
+    margin-top: 6px;
+    color: inherit;
+    opacity: 0.85;
+  }
+
+  /* ---------- Ledger / pools ---------- */
+  .ledger{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width:560px){ .ledger{ grid-template-columns: 1fr; } }
+  .side{
+    background:#fbf7ec;
+    border:1px solid var(--rule);
+    border-radius: 2px;
+    padding: 24px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .side .bar{
+    position:absolute; left:0; bottom:0; height:4px; width:100%;
+    background: var(--rule);
+  }
+  .side.yes .bar{ background: var(--verdict-yes); }
+  .side.no .bar{ background: var(--verdict-no); }
+  .side .label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .side .amount{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 34px;
+  }
+  .side .unit{ font-size:14px; color:var(--ink-soft); font-family:'Source Serif 4', serif; }
+
+  .actions{ display:flex; gap:10px; margin-top:16px; }
+  @media (max-width:560px){ .actions{ flex-direction:column; } }
+  .stake-input{
+    width:100%;
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    padding:9px 10px;
+    border:1px solid var(--rule);
+    border-radius:2px;
+    background:#fff;
+    margin-bottom:10px;
+    color: var(--ink);
+  }
+  .stake-input:focus{ outline:2px solid var(--gilt); outline-offset:1px; }
+
+  .full-btn{ width:100%; }
+
+  /* ---------- My position ---------- */
+  .position{
+    background: var(--paper-deep);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    font-size: 14px;
+  }
+  .position h3{
+    font-family:'Fraunces', serif;
+    font-size: 16px;
+    margin: 0 0 10px;
+  }
+  .position dl{ display:grid; grid-template-columns: auto 1fr; gap: 4px 18px; margin:0; font-family:'JetBrains Mono', monospace; font-size:13px;}
+  .position dt{ color:var(--ink-soft); }
+  .position dd{ margin:0; }
+
+  /* ---------- Resolve / claim panel ---------- */
+  .panel{
+    background:#fbf7ec;
+    border:1px dashed var(--rule);
+    border-radius:2px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .panel h3{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:18px;
+    margin: 0 0 6px;
+  }
+  .panel p{ color:var(--ink-soft); font-size:14px; margin:0 0 14px; max-width:520px;}
+
+  /* ---------- Log / proceedings ---------- */
+  .proceedings{
+    margin-top: 36px;
+  }
+  .proceedings h4{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color: var(--ink-soft);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .entry{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    padding: 8px 0;
+    border-bottom: 1px dotted var(--rule);
+    display:flex; gap:12px;
+    color: var(--ink-soft);
+  }
+  .entry .t{ color: var(--ink); flex-shrink:0; }
+  .entry a{ color: var(--seal); text-decoration:none; border-bottom: 1px solid currentColor; }
+  .entry a:hover{ opacity:0.7; }
+
+  footer{
+    text-align:center;
+    margin-top: 56px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    letter-spacing:0.05em;
+  }
+  footer a{ color: var(--seal); text-decoration:none; }
+
+  .hidden{ display:none !important; }
+
+  @media (prefers-reduced-motion: no-preference){
+    .docket, .side, .ribbon{ animation: rise 0.5s ease both; }
+    .side.no{ animation-delay: 0.05s; }
+  }
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(8px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  :focus-visible{ outline: 2px solid var(--gilt); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="letterhead">
+    <div class="seal">T</div>
+    <div class="eyebrow">GenLayer Bradbury Testnet · Docket No. 0944</div>
+    <h1 class="title">TruthBet</h1>
+    <p class="subtitle">A ledger that settles its own disputes — wagered in GEN, ruled by an AI sworn to the evidence.</p>
+  </div>
+
+  <div class="walletbar">
+    <div>
+      <span class="label">Witness on record: </span>
+      <span class="addr" id="walletAddr">not connected</span>
+    </div>
+    <button id="connectBtn">Connect Wallet</button>
+  </div>
+
+  <div class="docket">
+    <div class="case-no">EXHIBIT · TRUTHBET-0944 — FILED ON THE BRADBURY TESTNET</div>
+    <h2 class="question" id="questionText">Loading the docket…</h2>
+    <div class="meta-row">
+      <div class="item">
+        <span class="k">Evidence source</span>
+        <b id="resolutionUrlText">—</b>
+      </div>
+      <div class="item">
+        <span class="k">Eligible for ruling on or after</span>
+        <b id="closesAtText">—</b>
+      </div>
+      <div class="item">
+        <span class="k">Contract</span>
+        <b><a href="https://explorer-bradbury.genlayer.com/address/0x92A5F2008505411De615A34c4b43cC49C40C0944" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--rule);">0x92A5…0944 ↗</a></b>
+      </div>
+    </div>
+  </div>
+
+  <div id="ribbon" class="ribbon open">
+    <span class="dot"></span>
+    <div>
+      <div id="ribbonText">The docket is open. Wagers are being accepted.</div>
+      <div id="rationaleText" class="rationale hidden"></div>
+    </div>
+  </div>
+
+  <div class="ledger">
+    <div class="side yes">
+      <div class="bar"></div>
+      <div class="label">Yes pool</div>
+      <div class="amount"><span id="yesPool">—</span> <span class="unit">GEN</span></div>
+      <div class="actions" style="flex-direction:column;">
+        <input type="number" min="0" step="0.01" placeholder="Amount in GEN" class="stake-input" id="yesAmount" />
+        <button class="btn full-btn" id="betYesBtn">Wager on Yes</button>
+      </div>
+    </div>
+    <div class="side no">
+      <div class="bar"></div>
+      <div class="label">No pool</div>
+      <div class="amount"><span id="noPool">—</span> <span class="unit">GEN</span></div>
+      <div class="actions" style="flex-direction:column;">
+        <input type="number" min="0" step="0.01" placeholder="Amount in GEN" class="stake-input" id="noAmount" />
+        <button class="btn full-btn" id="betNoBtn">Wager on No</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="position hidden" id="positionBox">
+    <h3>Your standing</h3>
+    <dl>
+      <dt>Staked on Yes</dt><dd id="posYes">0 GEN</dd>
+      <dt>Staked on No</dt><dd id="posNo">0 GEN</dd>
+      <dt>Claimed</dt><dd id="posClaimed">No</dd>
+    </dl>
+  </div>
+
+  <div class="panel">
+    <h3>Call the ruling</h3>
+    <p>Once the docket is eligible, anyone may ask the network to rule. The contract fetches the evidence source, an LLM reads it, and every validator must reach the same verdict before it's recorded.</p>
+    <button class="btn ghost" id="resolveBtn">Request a ruling</button>
+  </div>
+
+  <div class="panel hidden" id="claimPanel">
+    <h3>Collect your winnings</h3>
+    <p>The docket has been ruled on. If you backed the side that prevailed, you may now withdraw your stake plus your share of the losing pool.</p>
+    <button class="btn" id="claimBtn">Claim payout</button>
+  </div>
+
+  <div class="proceedings">
+    <h4>Proceedings</h4>
+    <div id="log"></div>
+  </div>
+
+  <footer>
+    Source &amp; full record: <a href="https://github.com/Kingkanzi0/genlayer-truthbet" target="_blank" rel="noopener">github.com/Kingkanzi0/genlayer-truthbet</a>
+  </footer>
+
+</div>
+
+<script type="module">
+import { createClient, createAccount } from "https://esm.sh/genlayer-js@latest";
+import { testnetBradbury } from "https://esm.sh/genlayer-js@latest/chains";
+
+const CONTRACT_ADDRESS = "0x92A5F2008505411De615A34c4b43cC49C40C0944";
+const WEI_PER_GEN = 10n ** 18n;
+
+let client = null;
+let walletAddress = null;
+
+const $ = (id) => document.getElementById(id);
+const logBox = $("log");
+
+function logLine(text, link) {
+  const row = document.createElement("div");
+  row.className = "entry";
+  const t = document.createElement("span");
+  t.className = "t";
+  t.textContent = new Date().toLocaleTimeString();
+  row.appendChild(t);
+  const msg = document.createElement("span");
+  if (link) {
+    msg.innerHTML = `${text} — <a href="${link}" target="_blank" rel="noopener">view on explorer ↗</a>`;
+  } else {
+    msg.textContent = text;
+  }
+  row.appendChild(msg);
+  logBox.prepend(row);
+}
+
+function explorerTx(hash) {
+  return `https://explorer-bradbury.genlayer.com/tx/${hash}`;
+}
+
+function genToWei(amountStr) {
+  const amount = parseFloat(amountStr);
+  if (isNaN(amount) || amount <= 0) return null;
+  const micro = Math.round(amount * 1e6);
+  return (BigInt(micro) * WEI_PER_GEN) / 1_000_000n;
+}
+
+function weiToGen(weiStr) {
+  try {
+    const wei = BigInt(weiStr);
+    const whole = wei / WEI_PER_GEN;
+    const frac = wei % WEI_PER_GEN;
+    const fracStr = frac.toString().padStart(18, "0").slice(0, 4);
+    return `${whole}.${fracStr}`;
+  } catch {
+    return weiStr;
+  }
+}
+
+function readOnlyClient() {
+  return createClient({ chain: testnetBradbury, account: createAccount() });
+}
+
+async function refreshMarket() {
+  try {
+    const c = client || readOnlyClient();
+    const market = await c.readContract({
+      address: CONTRACT_ADDRESS,
+      functionName: "get_market",
+      args: [],
+    });
+
+    $("questionText").textContent = market.question;
+    $("resolutionUrlText").innerHTML = `<a href="${market.resolution_url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--rule);">${new URL(market.resolution_url).hostname} ↗</a>`;
+    $("closesAtText").textContent = market.closes_at;
+    $("yesPool").textContent = weiToGen(market.yes_pool);
+    $("noPool").textContent = weiToGen(market.no_pool);
+
+    const ribbon = $("ribbon");
+    const ribbonText = $("ribbonText");
+    const rationale = $("rationaleText");
+    const claimPanel = $("claimPanel");
+    const resolveBtn = $("resolveBtn");
+
+    if (market.resolved) {
+      const won = market.outcome === "YES";
+      ribbon.className = "ribbon " + (won ? "yes" : "no");
+      ribbonText.textContent = `Ruling entered: ${market.outcome}.`;
+      if (market.rationale) {
+        rationale.textContent = `"${market.rationale}"`;
+        rationale.classList.remove("hidden");
+      }
+      resolveBtn.disabled = true;
+      resolveBtn.textContent = "Ruling already entered";
+      claimPanel.classList.remove("hidden");
+      $("betYesBtn").disabled = true;
+      $("betNoBtn").disabled = true;
+    } else {
+      ribbon.className = "ribbon open";
+      ribbonText.textContent = "The docket is open. Wagers are being accepted.";
+      rationale.classList.add("hidden");
+    }
+
+    if (walletAddress) {
+      const mine = await c.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: "get_my_bets",
+        args: [walletAddress],
+      });
+      $("positionBox").classList.remove("hidden");
+      $("posYes").textContent = weiToGen(mine.yes) + " GEN";
+      $("posNo").textContent = weiToGen(mine.no) + " GEN";
+      $("posClaimed").textContent = mine.claimed ? "Yes" : "No";
+    }
+  } catch (err) {
+    console.error(err);
+    logLine("Could not reach the docket: " + err.message);
+  }
+}
+
+async function connectWallet() {
+  if (!window.ethereum) {
+    logLine("No wallet extension found. Install MetaMask to take part.");
+    alert("No wallet found. Please install MetaMask (or a compatible wallet) to bet, resolve, or claim.");
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    walletAddress = accounts[0];
+
+    client = createClient({
+      chain: testnetBradbury,
+      account: walletAddress,
+    });
+    await client.connect("testnetBradbury");
+
+    $("walletAddr").textContent = walletAddress.slice(0, 6) + "…" + walletAddress.slice(-4);
+    $("connectBtn").textContent = "Connected";
+    $("connectBtn").disabled = true;
+    logLine("Witness sworn in: " + walletAddress);
+    refreshMarket();
+  } catch (err) {
+    console.error(err);
+    logLine("Could not connect wallet: " + err.message);
+  }
+}
+
+async function placeBet(isYes) {
+  if (!client) { alert("Connect your wallet first."); return; }
+  const inputId = isYes ? "yesAmount" : "noAmount";
+  const amountStr = $(inputId).value;
+  const wei = genToWei(amountStr);
+  if (wei === null) { alert("Enter a valid GEN amount above 0."); return; }
+
+  const btn = isYes ? $("betYesBtn") : $("betNoBtn");
+  btn.disabled = true;
+  btn.textContent = "Filing wager…";
+
+  try {
+    const hash = await client.writeContract({
+      address: CONTRACT_ADDRESS,
+      functionName: isYes ? "bet_yes" : "bet_no",
+      args: [],
+      value: wei,
+    });
+    logLine(`Wager filed on ${isYes ? "Yes" : "No"} for ${amountStr} GEN. Awaiting consensus…`, explorerTx(hash));
+    await client.waitForTransactionReceipt({ hash, status: "ACCEPTED" });
+    logLine("Wager accepted by consensus.", explorerTx(hash));
+    $(inputId).value = "";
+    await refreshMarket();
+  } catch (err) {
+    console.error(err);
+    logLine("Wager failed: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = isYes ? "Wager on Yes" : "Wager on No";
+  }
+}
+
+async function requestRuling() {
+  if (!client) { alert("Connect your wallet first."); return; }
+  const btn = $("resolveBtn");
+  btn.disabled = true;
+  btn.textContent = "Consulting the evidence…";
+  try {
+    const hash = await client.writeContract({
+      address: CONTRACT_ADDRESS,
+      functionName: "resolve",
+      args: [],
+      value: 0n,
+    });
+    logLine("Ruling requested. Validators are reading the evidence and reaching consensus…", explorerTx(hash));
+    await client.waitForTransactionReceipt({ hash, status: "ACCEPTED" });
+    logLine("Ruling entered into the record.", explorerTx(hash));
+    await refreshMarket();
+  } catch (err) {
+    console.error(err);
+    logLine("Ruling request failed: " + err.message);
+    btn.disabled = false;
+    btn.textContent = "Request a ruling";
+  }
+}
+
+async function claimPayout() {
+  if (!client) { alert("Connect your wallet first."); return; }
+  const btn = $("claimBtn");
+  btn.disabled = true;
+  btn.textContent = "Collecting…";
+  try {
+    const hash = await client.writeContract({
+      address: CONTRACT_ADDRESS,
+      functionName: "claim",
+      args: [],
+      value: 0n,
+    });
+    logLine("Payout requested.", explorerTx(hash));
+    await client.waitForTransactionReceipt({ hash, status: "ACCEPTED" });
+    logLine("Payout collected.", explorerTx(hash));
+    await refreshMarket();
+  } catch (err) {
+    console.error(err);
+    logLine("Claim failed: " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Claim payout";
+  }
+}
+
+$("connectBtn").addEventListener("click", connectWallet);
+$("betYesBtn").addEventListener("click", () => placeBet(true));
+$("betNoBtn").addEventListener("click", () => placeBet(false));
+$("resolveBtn").addEventListener("click", requestRuling);
+$("claimBtn").addEventListener("click", claimPayout);
+
+refreshMarket();
+setInterval(refreshMarket, 20000);
+</script>
+
+</body>
+</html>
